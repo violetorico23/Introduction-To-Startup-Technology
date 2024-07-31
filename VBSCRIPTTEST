@@ -1,0 +1,1634 @@
+
+Rechecking application Project > Properties - MainPage as startupform
+Install APIs via Nuget
+Google.Apis.Sheets.v4
+Google.Apis.Drive.v3
+Google.Apis.Oauth2.v2
+
+ADD MODULE
+Program.vb
+Public Class Program
+    Public Shared Sub Main()
+        Application.EnableVisualStyles()
+        Application.SetCompatibleTextRenderingDefault(False)
+
+        Dim loginForm As New LoginForm()
+        If loginForm.ShowDialog() = DialogResult.OK Then
+            Dim mainPage As New MainPage()
+            Application.Run(mainPage)
+        Else
+            Application.Exit()
+        End If
+    End Sub
+End Class
+
+
+Code to search
+ProgressForm.vb
+LoginForm.vb
+LoginForm.designer.vb
+MainPage.vb
+MainPage.designer.vb
+PageUpdate.vb
+PageUpdate.designer.vb
+
+ProgressForm.vb
+Public Class ProgressForm
+    Private Sub ProgressForm_Load(sender As Object, e As EventArgs) Handles MyBase.Load
+        ' Configure the ProgressBar
+        ProgressBar1.Style = ProgressBarStyle.Marquee
+        ProgressBar1.MarqueeAnimationSpeed = 30
+
+        ' Set the form's start position to center of the screen
+        Me.StartPosition = FormStartPosition.CenterScreen
+    End Sub
+End Class
+
+ProgressForm.designer.vb
+<Global.Microsoft.VisualBasic.CompilerServices.DesignerGenerated()>
+Partial Class ProgressForm
+    Inherits System.Windows.Forms.Form
+
+    'Form overrides dispose to clean up the component list.
+    <System.Diagnostics.DebuggerNonUserCode()>
+    Protected Overrides Sub Dispose(ByVal disposing As Boolean)
+        Try
+            If disposing AndAlso components IsNot Nothing Then
+                components.Dispose()
+            End If
+        Finally
+            MyBase.Dispose(disposing)
+        End Try
+    End Sub
+
+    'Required by the Windows Form Designer
+    Private components As System.ComponentModel.IContainer
+
+    'NOTE: The following procedure is required by the Windows Form Designer
+    'It can be modified using the Windows Form Designer.  
+    'Do not modify it using the code editor.
+    <System.Diagnostics.DebuggerStepThrough()>
+    Private Sub InitializeComponent()
+        Me.Label1 = New System.Windows.Forms.Label()
+        Me.ProgressBar1 = New System.Windows.Forms.ProgressBar()
+        Me.SuspendLayout()
+        '
+        'Label1
+        '
+        Me.Label1.AutoSize = True
+        Me.Label1.Font = New System.Drawing.Font("Microsoft Sans Serif", 8.25!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.Label1.Location = New System.Drawing.Point(4, 0)
+        Me.Label1.Name = "Label1"
+        Me.Label1.Size = New System.Drawing.Size(141, 13)
+        Me.Label1.TabIndex = 0
+        Me.Label1.Text = "Please wait, updating data..."
+        '
+        'ProgressBar1
+        '
+        Me.ProgressBar1.Location = New System.Drawing.Point(2, 17)
+        Me.ProgressBar1.Name = "ProgressBar1"
+        Me.ProgressBar1.Size = New System.Drawing.Size(145, 12)
+        Me.ProgressBar1.Style = System.Windows.Forms.ProgressBarStyle.Marquee
+        Me.ProgressBar1.TabIndex = 1
+        '
+        'ProgressForm
+        '
+        Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
+        Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
+        Me.ClientSize = New System.Drawing.Size(150, 29)
+        Me.Controls.Add(Me.Label1)
+        Me.Controls.Add(Me.ProgressBar1)
+        Me.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None
+        Me.Location = New System.Drawing.Point(500, 500)
+        Me.Name = "ProgressForm"
+        Me.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen
+        Me.Text = "Form1"
+        Me.TransparencyKey = System.Drawing.Color.Transparent
+        Me.ResumeLayout(False)
+        Me.PerformLayout()
+
+    End Sub
+
+    Friend WithEvents Label1 As Label
+    Friend WithEvents ProgressBar1 As ProgressBar
+End Class
+
+LoginForm.vb
+Imports System.IO
+Imports System.Threading
+Imports System.Windows.Forms
+Imports Google.Apis.Auth.OAuth2
+Imports Google.Apis.Services
+Imports Google.Apis.Sheets.v4
+Imports Google.Apis.Util.Store
+
+Public Class LoginForm
+    Public Property Service As SheetsService
+
+    Private Async Sub btnLogin_Click(sender As Object, e As EventArgs) Handles LoginButton.Click
+        Try
+            Await InitializeGoogleSheetsAPIAsync()
+            MessageBox.Show("Login successful!")
+            Me.DialogResult = DialogResult.OK
+            Me.Close()
+        Catch ex As Exception
+            MessageBox.Show("An error occurred during authentication: " & ex.Message)
+        End Try
+    End Sub
+
+    Private Async Function InitializeGoogleSheetsAPIAsync() As Task
+        Dim credPath As String = "token.json"
+        Using stream = New FileStream("D:\TEST\VBSCRIPTTEST\client_secret_12727952522-6bmg328tk6cfkcqirgnitini759bs8pa.apps.googleusercontent.com.json", FileMode.Open, FileAccess.Read)
+            Dim credential = Await GoogleWebAuthorizationBroker.AuthorizeAsync(
+                GoogleClientSecrets.FromStream(stream).Secrets,
+                New String() {SheetsService.Scope.Spreadsheets},
+                "user",
+                CancellationToken.None,
+                New FileDataStore(credPath, True))
+
+            Service = New SheetsService(New BaseClientService.Initializer() With {
+                .HttpClientInitializer = credential,
+                .ApplicationName = "VBSCRIPTTEST"
+            })
+        End Using
+    End Function
+End Class
+
+LoginForm.designer.vb
+<Global.Microsoft.VisualBasic.CompilerServices.DesignerGenerated()>
+Partial Class LoginForm
+    Inherits System.Windows.Forms.Form
+
+    'Form overrides dispose to clean up the component list.
+    <System.Diagnostics.DebuggerNonUserCode()>
+    Protected Overrides Sub Dispose(ByVal disposing As Boolean)
+        Try
+            If disposing AndAlso components IsNot Nothing Then
+                components.Dispose()
+            End If
+        Finally
+            MyBase.Dispose(disposing)
+        End Try
+    End Sub
+
+    'Required by the Windows Form Designer
+    Private components As System.ComponentModel.IContainer
+
+    'NOTE: The following procedure is required by the Windows Form Designer
+    'It can be modified using the Windows Form Designer.  
+    'Do not modify it using the code editor.
+    <System.Diagnostics.DebuggerStepThrough()>
+    Private Sub InitializeComponent()
+        Me.LoginButton = New System.Windows.Forms.Button()
+        Me.SuspendLayout()
+        '
+        'LoginButton
+        '
+        Me.LoginButton.Location = New System.Drawing.Point(30, 30)
+        Me.LoginButton.Name = "LoginButton"
+        Me.LoginButton.Size = New System.Drawing.Size(123, 23)
+        Me.LoginButton.TabIndex = 0
+        Me.LoginButton.Text = "Login with Google"
+        Me.LoginButton.UseVisualStyleBackColor = True
+        '
+        'LoginForm
+        '
+        Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
+        Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
+        Me.ClientSize = New System.Drawing.Size(184, 79)
+        Me.Controls.Add(Me.LoginButton)
+        Me.Name = "LoginForm"
+        Me.Text = "Login"
+        Me.ResumeLayout(False)
+
+    End Sub
+
+    Friend WithEvents LoginButton As Button
+End Class
+
+MainPage.vb
+Imports System
+Imports System.Windows.Forms
+Imports Google.Apis.Auth.OAuth2
+Imports Google.Apis.Services
+Imports Google.Apis.Sheets.v4
+Imports Google.Apis.Sheets.v4.Data
+Imports Google.Apis.Util.Store
+Imports System.IO
+Imports System.Threading
+Imports System.Windows.Forms.VisualStyles.VisualStyleElement
+
+Public Class MainPage
+    Private Shared ReadOnly ApplicationName As String = "VBSCRIPTTEST"
+    Private Shared ReadOnly SpreadsheetId As String = "1JOWFl9A1NovpzC-RH3TgqqJOlAV19U2dnq7WtQ9RXJ0"
+    Private Const RangeBase As String = "A4:Q"
+    Private Shared ReadOnly Scopes As String() = {SheetsService.Scope.Spreadsheets}
+    Private service As SheetsService
+
+    Private Sub MainPage_Load(sender As Object, e As EventArgs) Handles MyBase.Load
+        ' Assign context menu to all labels
+        For Each ctrl As Control In Me.Controls
+            If TypeOf ctrl Is Label Then
+                ctrl.ContextMenuStrip = contextMenuStrip1
+            End If
+        Next
+        InitializeGoogleSheetsAPI()
+        AddHandler searchTagTextBox.KeyDown, AddressOf SearchTagTextBox_KeyDown
+
+        Dim LoginForm As New LoginForm()
+        If loginForm.ShowDialog() = DialogResult.OK Then
+            ' Authentication was successful
+            service = LoginForm.Service
+            ' Initialize main page functionality here
+            InitializeUI()
+        Else
+            MessageBox.Show("Failed to authenticate with Google.")
+            Application.Exit()
+        End If
+    End Sub
+
+    Private Sub InitializeUI()
+        ' Example: Set initial visibility of controls
+        brand1.Visible = True
+        assettag1.Visible = True
+        serialnumber1.Visible = True
+        userassigned1.Visible = True
+        location1.Visible = True
+        po1.Visible = True
+        price1.Visible = True
+        condition1.Visible = True
+        hostname1.Visible = True
+        modelnumber1.Visible = True
+        equipmentlob1.Visible = True
+        status1.Visible = True
+        userlob1.Visible = True
+        idnumber1.Visible = True
+        dateallocated1.Visible = True
+        datereturned1.Visible = True
+        comments1.Visible = True
+
+        ' Example: Clear text boxes or labels
+        searchTagTextBox.Text = String.Empty
+        brand1.Text = String.Empty
+        assettag1.Text = String.Empty
+        serialnumber1.Text = String.Empty
+        userassigned1.Text = String.Empty
+        location1.Text = String.Empty
+        po1.Text = String.Empty
+        price1.Text = String.Empty
+        condition1.Text = String.Empty
+        hostname1.Text = String.Empty
+        modelnumber1.Text = String.Empty
+        equipmentlob1.Text = String.Empty
+        status1.Text = String.Empty
+        userlob1.Text = String.Empty
+        idnumber1.Text = String.Empty
+        dateallocated1.Text = String.Empty
+        datereturned1.Text = String.Empty
+        comments1.Text = String.Empty
+
+        ' Example: Set default values or states
+        searchTagTextBox.Focus() ' Set focus to the search tag textbox
+        hostnameHeader.Visible = False
+        hostname1.Visible = False
+        modelnumberHeader.Visible = True
+        modelnumber1.Visible = True
+
+        ' Example: Set up event handlers if not already done
+        AddHandler SearchButton.Click, AddressOf SearchButton_Click
+        AddHandler updatepage.Click, AddressOf Updatepage_Click
+
+        ' Initialize any additional controls or settings
+        ' e.g., Load default data, set initial states of combo boxes, etc.
+    End Sub
+
+    Private Sub CopyToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles copyToolStripMenuItem.Click
+        Dim menu As ToolStripMenuItem = CType(sender, ToolStripMenuItem)
+        Dim contextMenu As ContextMenuStrip = CType(menu.GetCurrentParent(), ContextMenuStrip)
+        Dim sourceControl As Control = contextMenu.SourceControl
+
+        If TypeOf sourceControl Is Label Then
+            Dim label As Label = CType(sourceControl, Label)
+            Clipboard.SetText(label.Text)
+        End If
+    End Sub
+
+
+    Private Sub InitializeGoogleSheetsAPI()
+        Using stream = New FileStream("D:\TEST\VBSCRIPTTEST\client_secret_12727952522-6bmg328tk6cfkcqirgnitini759bs8pa.apps.googleusercontent.com.json", FileMode.Open, FileAccess.Read)
+            Dim credPath As String = "token.json"
+            Dim credential = GoogleWebAuthorizationBroker.AuthorizeAsync(
+                GoogleClientSecrets.FromStream(stream).Secrets,
+                Scopes,
+                "user",
+                CancellationToken.None,
+                New FileDataStore(credPath, True)).Result
+
+            service = New SheetsService(New BaseClientService.Initializer() With {
+                .HttpClientInitializer = credential,
+                .ApplicationName = ApplicationName
+            })
+        End Using
+    End Sub
+
+    Private Sub SearchButton_Click(sender As Object, e As EventArgs) Handles SearchButton.Click
+        Dim searchTag As String = searchTagTextBox.Text
+
+        ' Validate the search tag
+        If String.IsNullOrWhiteSpace(searchTag) OrElse Not IsValidTagPrefix(searchTag) Then
+            MessageBox.Show("Please enter a valid tag.")
+            Return
+        End If
+
+        ' Proceed with data retrieval and display
+        SearchAndDisplayData(searchTag)
+    End Sub
+
+    Private Function IsValidTagPrefix(tag As String) As Boolean
+        Return tag.StartsWith("MS-LTP") OrElse tag.StartsWith("MS-SU")
+    End Function
+
+    Private Sub SearchAndDisplayData(searchTag As String)
+        Try
+            ' Proceed with data retrieval and display
+            Dim sheetName As String = GetSheetNameFromTag(searchTag)
+            Dim range As String = $"{sheetName}!A2:Z"
+            Dim request As SpreadsheetsResource.ValuesResource.GetRequest = service.Spreadsheets.Values.Get(SpreadsheetId, range)
+            Dim response As ValueRange = request.Execute()
+            Dim values As IList(Of IList(Of Object)) = response.Values
+
+            Dim dataFound As Boolean = False
+
+            If values IsNot Nothing AndAlso values.Count > 0 Then
+                For Each row As IList(Of Object) In values
+                    If row.Count > 6 AndAlso row(6).ToString() = searchTag Then
+                        brand1.Text = If(row.Count > 2, row(2).ToString(), String.Empty)
+                        assettag1.Text = If(row.Count > 6, row(6).ToString(), String.Empty)
+                        serialnumber1.Text = If(row.Count > 5, row(5).ToString(), String.Empty)
+                        userassigned1.Text = If(row.Count > 11, row(11).ToString(), String.Empty)
+                        location1.Text = If(row.Count > 9, row(9).ToString(), String.Empty)
+                        po1.Text = If(row.Count > 0, row(0).ToString(), String.Empty)
+                        price1.Text = If(row.Count > 1, row(1).ToString(), String.Empty)
+                        condition1.Text = If(row.Count > 4, row(4).ToString(), String.Empty)
+                        hostname1.Text = If(row.Count > 3, row(3).ToString(), String.Empty)
+                        modelnumber1.Text = If(row.Count > 3, row(3).ToString(), String.Empty)
+                        equipmentlob1.Text = If(row.Count > 10, row(10).ToString(), String.Empty)
+                        status1.Text = If(row.Count > 8, row(8).ToString(), String.Empty)
+                        userlob1.Text = If(row.Count > 13, row(13).ToString(), String.Empty)
+                        idnumber1.Text = If(row.Count > 12, row(12).ToString(), String.Empty)
+                        dateallocated1.Text = If(row.Count > 14, row(14).ToString(), String.Empty)
+                        datereturned1.Text = If(row.Count > 15, row(15).ToString(), String.Empty)
+                        comments1.Text = If(row.Count > 16, row(16).ToString(), String.Empty)
+                        dataFound = True
+                        Exit For
+                    End If
+                Next
+
+                If Not dataFound Then
+                    ' Display "Tag not found" message
+                    brand1.Text = String.Empty
+                    assettag1.Text = String.Empty
+                    serialnumber1.Text = String.Empty
+                    userassigned1.Text = String.Empty
+                    location1.Text = String.Empty
+                    po1.Text = String.Empty
+                    price1.Text = String.Empty
+                    condition1.Text = String.Empty
+                    hostname1.Text = String.Empty
+                    modelnumber1.Text = String.Empty
+                    equipmentlob1.Text = String.Empty
+                    status1.Text = String.Empty
+                    userlob1.Text = String.Empty
+                    idnumber1.Text = String.Empty
+                    dateallocated1.Text = String.Empty
+                    datereturned1.Text = String.Empty
+                    comments1.Text = String.Empty
+
+                    MessageBox.Show("Tag not found.")
+                End If
+            Else
+                ' Handle case where no values are returned from the API
+                brand1.Text = String.Empty
+                assettag1.Text = String.Empty
+                serialnumber1.Text = String.Empty
+                userassigned1.Text = String.Empty
+                location1.Text = String.Empty
+                po1.Text = String.Empty
+                price1.Text = String.Empty
+                condition1.Text = String.Empty
+                hostname1.Text = String.Empty
+                modelnumber1.Text = String.Empty
+                equipmentlob1.Text = String.Empty
+                status1.Text = String.Empty
+                userlob1.Text = String.Empty
+                idnumber1.Text = String.Empty
+                dateallocated1.Text = String.Empty
+                datereturned1.Text = String.Empty
+                comments1.Text = String.Empty
+
+                MessageBox.Show("Tag not found.")
+            End If
+        Catch ex As Exception
+            ' Handle invalid tag format or other exceptions
+            brand1.Text = String.Empty
+            assettag1.Text = String.Empty
+            serialnumber1.Text = String.Empty
+            userassigned1.Text = String.Empty
+            location1.Text = String.Empty
+            po1.Text = String.Empty
+            price1.Text = String.Empty
+            condition1.Text = String.Empty
+            hostname1.Text = String.Empty
+            modelnumber1.Text = String.Empty
+            equipmentlob1.Text = String.Empty
+            status1.Text = String.Empty
+            userlob1.Text = String.Empty
+            idnumber1.Text = String.Empty
+            dateallocated1.Text = String.Empty
+            datereturned1.Text = String.Empty
+            comments1.Text = String.Empty
+
+            MessageBox.Show("An error occurred while searching for the tag.")
+        End Try
+
+        ' Check if the tag prefix is valid and set visibility of hostname labels
+        If IsValidTagPrefix(searchTag) Then
+            hostnameHeader.Visible = True
+            hostname1.Visible = True
+            modelnumberHeader.Visible = False
+            modelnumber1.Visible = False
+        Else
+            hostnameHeader.Visible = False
+            hostname1.Visible = False
+            modelnumberHeader.Visible = True
+            modelnumber1.Visible = True
+        End If
+    End Sub
+
+    Private Function GetSheetNameFromTag(tag As String) As String
+        If tag.StartsWith("MS-LTP") Then
+            Return "LAPTOP"
+        ElseIf tag.StartsWith("MS-MNTR") Then
+            Return "Monitor"
+        ElseIf tag.StartsWith("MS-SU") Then
+            Return "SystemUnit"
+        Else
+            MessageBox.Show("Invalid tag format.")
+            Return String.Empty
+        End If
+    End Function
+
+    Private Sub SearchTagTextBox_KeyDown(sender As Object, e As KeyEventArgs)
+        If e.KeyCode = Keys.Enter Then
+            Dim searchTag As String = searchTagTextBox.Text
+
+            ' Validate the search tag
+            If String.IsNullOrWhiteSpace(searchTag) OrElse Not IsValidTagPrefix(searchTag) Then
+                MessageBox.Show("Please enter a valid tag.")
+                Return
+            End If
+
+            ' Proceed with data retrieval and display
+            SearchAndDisplayData(searchTag)
+        End If
+    End Sub
+
+
+    Private Sub Updatepage_Click(sender As Object, e As EventArgs) Handles updatepage.Click
+        Dim searchTag As String = searchTagTextBox.Text
+        Dim userLobValue As String = userlob1.Text
+        Dim userAssignedValue As String = userassigned1.Text
+        Dim dateAllocatedValue As String = dateallocated1.Text
+        Dim dateReturnedValue As String = datereturned1.Text
+        Dim conditionValue As String = condition1.Text
+        Dim commentsValue As String = comments1.Text
+
+        ' Validate the search tag
+        If String.IsNullOrWhiteSpace(searchTag) OrElse Not IsValidTagPrefix(searchTag) Then
+            MessageBox.Show("Please enter a valid tag.")
+            Return
+        End If
+
+        Dim pageUpdate As New PageUpdate(service, searchTag, userLobValue, userAssignedValue, dateAllocatedValue, dateReturnedValue, conditionValue, commentsValue)
+        pageUpdate.ShowDialog()
+    End Sub
+
+End Class
+
+
+MainPage.designer.vb
+<Global.Microsoft.VisualBasic.CompilerServices.DesignerGenerated()>
+Partial Class MainPage
+    Inherits System.Windows.Forms.Form
+
+    'Form overrides dispose to clean up the component list.
+    <System.Diagnostics.DebuggerNonUserCode()>
+    Protected Overrides Sub Dispose(ByVal disposing As Boolean)
+        Try
+            If disposing AndAlso components IsNot Nothing Then
+                components.Dispose()
+            End If
+        Finally
+            MyBase.Dispose(disposing)
+        End Try
+    End Sub
+
+    'Required by the Windows Form Designer
+    Private components As System.ComponentModel.IContainer
+
+    'NOTE: The following procedure is required by the Windows Form Designer
+    'It can be modified using the Windows Form Designer.  
+    'Do not modify it using the code editor.
+    <System.Diagnostics.DebuggerStepThrough()>
+    Private Sub InitializeComponent()
+        Me.components = New System.ComponentModel.Container()
+        Me.searchTagTextBox = New System.Windows.Forms.TextBox()
+        Me.SearchButton = New System.Windows.Forms.Button()
+        Me.priceHeader = New System.Windows.Forms.Label()
+        Me.contextMenuStrip1 = New System.Windows.Forms.ContextMenuStrip(Me.components)
+        Me.copyToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.poHeader = New System.Windows.Forms.Label()
+        Me.brandHeader = New System.Windows.Forms.Label()
+        Me.assettagHeader = New System.Windows.Forms.Label()
+        Me.serialnumberHeader = New System.Windows.Forms.Label()
+        Me.userassignedHeader = New System.Windows.Forms.Label()
+        Me.locationHeader = New System.Windows.Forms.Label()
+        Me.price1 = New System.Windows.Forms.Label()
+        Me.po1 = New System.Windows.Forms.Label()
+        Me.brand1 = New System.Windows.Forms.Label()
+        Me.assettag1 = New System.Windows.Forms.Label()
+        Me.serialnumber1 = New System.Windows.Forms.Label()
+        Me.userassigned1 = New System.Windows.Forms.Label()
+        Me.location1 = New System.Windows.Forms.Label()
+        Me.updatepage = New System.Windows.Forms.Button()
+        Me.condition1 = New System.Windows.Forms.Label()
+        Me.conditionHeader = New System.Windows.Forms.Label()
+        Me.hostname1 = New System.Windows.Forms.Label()
+        Me.hostnameHeader = New System.Windows.Forms.Label()
+        Me.modelnumber1 = New System.Windows.Forms.Label()
+        Me.modelnumberHeader = New System.Windows.Forms.Label()
+        Me.status1 = New System.Windows.Forms.Label()
+        Me.statusHeader = New System.Windows.Forms.Label()
+        Me.equipmentlob1 = New System.Windows.Forms.Label()
+        Me.equipmentlobHeader = New System.Windows.Forms.Label()
+        Me.idnumber1 = New System.Windows.Forms.Label()
+        Me.idnumberHeader = New System.Windows.Forms.Label()
+        Me.userlob1 = New System.Windows.Forms.Label()
+        Me.userlobHeader = New System.Windows.Forms.Label()
+        Me.dateallocated1 = New System.Windows.Forms.Label()
+        Me.dateallocatedHeader = New System.Windows.Forms.Label()
+        Me.datereturned1 = New System.Windows.Forms.Label()
+        Me.datereturnedHeader = New System.Windows.Forms.Label()
+        Me.comments1 = New System.Windows.Forms.Label()
+        Me.commentsHeader = New System.Windows.Forms.Label()
+        Me.contextMenuStrip1.SuspendLayout()
+        Me.SuspendLayout()
+        '
+        'searchTagTextBox
+        '
+        Me.searchTagTextBox.Location = New System.Drawing.Point(12, 23)
+        Me.searchTagTextBox.Margin = New System.Windows.Forms.Padding(4, 3, 4, 3)
+        Me.searchTagTextBox.Name = "searchTagTextBox"
+        Me.searchTagTextBox.Size = New System.Drawing.Size(233, 21)
+        Me.searchTagTextBox.TabIndex = 0
+        '
+        'SearchButton
+        '
+        Me.SearchButton.Location = New System.Drawing.Point(251, 21)
+        Me.SearchButton.Margin = New System.Windows.Forms.Padding(4, 3, 4, 3)
+        Me.SearchButton.Name = "SearchButton"
+        Me.SearchButton.Size = New System.Drawing.Size(88, 27)
+        Me.SearchButton.TabIndex = 1
+        Me.SearchButton.Text = "Search"
+        Me.SearchButton.UseVisualStyleBackColor = False
+        '
+        'priceHeader
+        '
+        Me.priceHeader.ContextMenuStrip = Me.contextMenuStrip1
+        Me.priceHeader.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.priceHeader.Location = New System.Drawing.Point(149, 72)
+        Me.priceHeader.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
+        Me.priceHeader.Name = "priceHeader"
+        Me.priceHeader.Size = New System.Drawing.Size(59, 28)
+        Me.priceHeader.TabIndex = 17
+        Me.priceHeader.Text = "Price"
+        '
+        'contextMenuStrip1
+        '
+        Me.contextMenuStrip1.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.copyToolStripMenuItem})
+        Me.contextMenuStrip1.Name = "ContextMenuStrip1"
+        Me.contextMenuStrip1.Size = New System.Drawing.Size(103, 26)
+        '
+        'copyToolStripMenuItem
+        '
+        Me.copyToolStripMenuItem.Name = "copyToolStripMenuItem"
+        Me.copyToolStripMenuItem.Size = New System.Drawing.Size(102, 22)
+        Me.copyToolStripMenuItem.Text = "Copy"
+        '
+        'poHeader
+        '
+        Me.poHeader.ContextMenuStrip = Me.contextMenuStrip1
+        Me.poHeader.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.poHeader.Location = New System.Drawing.Point(17, 72)
+        Me.poHeader.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
+        Me.poHeader.Name = "poHeader"
+        Me.poHeader.Size = New System.Drawing.Size(43, 28)
+        Me.poHeader.TabIndex = 2
+        Me.poHeader.Text = "PO#"
+        '
+        'brandHeader
+        '
+        Me.brandHeader.ContextMenuStrip = Me.contextMenuStrip1
+        Me.brandHeader.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.brandHeader.Location = New System.Drawing.Point(17, 117)
+        Me.brandHeader.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
+        Me.brandHeader.Name = "brandHeader"
+        Me.brandHeader.Size = New System.Drawing.Size(89, 23)
+        Me.brandHeader.TabIndex = 3
+        Me.brandHeader.Text = "Brand"
+        '
+        'assettagHeader
+        '
+        Me.assettagHeader.ContextMenuStrip = Me.contextMenuStrip1
+        Me.assettagHeader.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.assettagHeader.Location = New System.Drawing.Point(441, 117)
+        Me.assettagHeader.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
+        Me.assettagHeader.Name = "assettagHeader"
+        Me.assettagHeader.Size = New System.Drawing.Size(102, 23)
+        Me.assettagHeader.TabIndex = 4
+        Me.assettagHeader.Text = "Asset Tag"
+        '
+        'serialnumberHeader
+        '
+        Me.serialnumberHeader.ContextMenuStrip = Me.contextMenuStrip1
+        Me.serialnumberHeader.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.serialnumberHeader.Location = New System.Drawing.Point(293, 117)
+        Me.serialnumberHeader.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
+        Me.serialnumberHeader.Name = "serialnumberHeader"
+        Me.serialnumberHeader.Size = New System.Drawing.Size(126, 23)
+        Me.serialnumberHeader.TabIndex = 5
+        Me.serialnumberHeader.Text = "Serial Number"
+        '
+        'userassignedHeader
+        '
+        Me.userassignedHeader.ContextMenuStrip = Me.contextMenuStrip1
+        Me.userassignedHeader.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.userassignedHeader.Location = New System.Drawing.Point(293, 238)
+        Me.userassignedHeader.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
+        Me.userassignedHeader.Name = "userassignedHeader"
+        Me.userassignedHeader.Size = New System.Drawing.Size(126, 23)
+        Me.userassignedHeader.TabIndex = 6
+        Me.userassignedHeader.Text = "User Assigned"
+        '
+        'locationHeader
+        '
+        Me.locationHeader.ContextMenuStrip = Me.contextMenuStrip1
+        Me.locationHeader.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.locationHeader.Location = New System.Drawing.Point(441, 175)
+        Me.locationHeader.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
+        Me.locationHeader.Name = "locationHeader"
+        Me.locationHeader.Size = New System.Drawing.Size(78, 23)
+        Me.locationHeader.TabIndex = 7
+        Me.locationHeader.Text = "Location"
+        '
+        'price1
+        '
+        Me.price1.BackColor = System.Drawing.SystemColors.ActiveCaption
+        Me.price1.ContextMenuStrip = Me.contextMenuStrip1
+        Me.price1.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.price1.Location = New System.Drawing.Point(198, 72)
+        Me.price1.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
+        Me.price1.Name = "price1"
+        Me.price1.Padding = New System.Windows.Forms.Padding(0, 2, 0, 0)
+        Me.price1.Size = New System.Drawing.Size(75, 28)
+        Me.price1.TabIndex = 18
+        '
+        'po1
+        '
+        Me.po1.BackColor = System.Drawing.SystemColors.ActiveCaption
+        Me.po1.ContextMenuStrip = Me.contextMenuStrip1
+        Me.po1.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.po1.Location = New System.Drawing.Point(61, 72)
+        Me.po1.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
+        Me.po1.Name = "po1"
+        Me.po1.Padding = New System.Windows.Forms.Padding(0, 2, 0, 0)
+        Me.po1.Size = New System.Drawing.Size(75, 28)
+        Me.po1.TabIndex = 8
+        '
+        'brand1
+        '
+        Me.brand1.BackColor = System.Drawing.SystemColors.ActiveCaption
+        Me.brand1.ContextMenuStrip = Me.contextMenuStrip1
+        Me.brand1.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.brand1.Location = New System.Drawing.Point(17, 140)
+        Me.brand1.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
+        Me.brand1.Name = "brand1"
+        Me.brand1.Padding = New System.Windows.Forms.Padding(0, 2, 0, 0)
+        Me.brand1.Size = New System.Drawing.Size(119, 35)
+        Me.brand1.TabIndex = 9
+        '
+        'assettag1
+        '
+        Me.assettag1.BackColor = System.Drawing.SystemColors.ActiveCaption
+        Me.assettag1.ContextMenuStrip = Me.contextMenuStrip1
+        Me.assettag1.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.assettag1.Location = New System.Drawing.Point(441, 140)
+        Me.assettag1.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
+        Me.assettag1.Name = "assettag1"
+        Me.assettag1.Padding = New System.Windows.Forms.Padding(0, 2, 0, 0)
+        Me.assettag1.Size = New System.Drawing.Size(128, 35)
+        Me.assettag1.TabIndex = 10
+        '
+        'serialnumber1
+        '
+        Me.serialnumber1.BackColor = System.Drawing.SystemColors.ActiveCaption
+        Me.serialnumber1.ContextMenuStrip = Me.contextMenuStrip1
+        Me.serialnumber1.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.serialnumber1.Location = New System.Drawing.Point(293, 140)
+        Me.serialnumber1.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
+        Me.serialnumber1.Name = "serialnumber1"
+        Me.serialnumber1.Padding = New System.Windows.Forms.Padding(0, 2, 0, 0)
+        Me.serialnumber1.Size = New System.Drawing.Size(137, 35)
+        Me.serialnumber1.TabIndex = 11
+        '
+        'userassigned1
+        '
+        Me.userassigned1.BackColor = System.Drawing.SystemColors.ActiveCaption
+        Me.userassigned1.ContextMenuStrip = Me.contextMenuStrip1
+        Me.userassigned1.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.userassigned1.Location = New System.Drawing.Point(293, 261)
+        Me.userassigned1.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
+        Me.userassigned1.Name = "userassigned1"
+        Me.userassigned1.Padding = New System.Windows.Forms.Padding(0, 2, 0, 0)
+        Me.userassigned1.Size = New System.Drawing.Size(137, 35)
+        Me.userassigned1.TabIndex = 12
+        '
+        'location1
+        '
+        Me.location1.BackColor = System.Drawing.SystemColors.ActiveCaption
+        Me.location1.ContextMenuStrip = Me.contextMenuStrip1
+        Me.location1.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.location1.Location = New System.Drawing.Point(441, 198)
+        Me.location1.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
+        Me.location1.Name = "location1"
+        Me.location1.Padding = New System.Windows.Forms.Padding(0, 2, 0, 0)
+        Me.location1.Size = New System.Drawing.Size(128, 35)
+        Me.location1.TabIndex = 13
+        '
+        'updatepage
+        '
+        Me.updatepage.Location = New System.Drawing.Point(20, 390)
+        Me.updatepage.Margin = New System.Windows.Forms.Padding(4, 3, 4, 3)
+        Me.updatepage.Name = "updatepage"
+        Me.updatepage.Size = New System.Drawing.Size(88, 27)
+        Me.updatepage.TabIndex = 15
+        Me.updatepage.Text = "Update"
+        Me.updatepage.UseVisualStyleBackColor = False
+        '
+        'condition1
+        '
+        Me.condition1.BackColor = System.Drawing.SystemColors.ActiveCaption
+        Me.condition1.ContextMenuStrip = Me.contextMenuStrip1
+        Me.condition1.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.condition1.Location = New System.Drawing.Point(151, 198)
+        Me.condition1.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
+        Me.condition1.Name = "condition1"
+        Me.condition1.Padding = New System.Windows.Forms.Padding(0, 2, 0, 0)
+        Me.condition1.Size = New System.Drawing.Size(132, 35)
+        Me.condition1.TabIndex = 20
+        '
+        'conditionHeader
+        '
+        Me.conditionHeader.ContextMenuStrip = Me.contextMenuStrip1
+        Me.conditionHeader.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.conditionHeader.Location = New System.Drawing.Point(151, 175)
+        Me.conditionHeader.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
+        Me.conditionHeader.Name = "conditionHeader"
+        Me.conditionHeader.Size = New System.Drawing.Size(79, 23)
+        Me.conditionHeader.TabIndex = 19
+        Me.conditionHeader.Text = "Condition"
+        '
+        'hostname1
+        '
+        Me.hostname1.BackColor = System.Drawing.SystemColors.ActiveCaption
+        Me.hostname1.ContextMenuStrip = Me.contextMenuStrip1
+        Me.hostname1.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.hostname1.Location = New System.Drawing.Point(151, 140)
+        Me.hostname1.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
+        Me.hostname1.Name = "hostname1"
+        Me.hostname1.Padding = New System.Windows.Forms.Padding(0, 2, 0, 0)
+        Me.hostname1.Size = New System.Drawing.Size(132, 35)
+        Me.hostname1.TabIndex = 22
+        Me.hostname1.Visible = False
+        '
+        'hostnameHeader
+        '
+        Me.hostnameHeader.ContextMenuStrip = Me.contextMenuStrip1
+        Me.hostnameHeader.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.hostnameHeader.Location = New System.Drawing.Point(151, 117)
+        Me.hostnameHeader.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
+        Me.hostnameHeader.Name = "hostnameHeader"
+        Me.hostnameHeader.Size = New System.Drawing.Size(93, 23)
+        Me.hostnameHeader.TabIndex = 21
+        Me.hostnameHeader.Text = "Host Name"
+        Me.hostnameHeader.Visible = False
+        '
+        'modelnumber1
+        '
+        Me.modelnumber1.BackColor = System.Drawing.SystemColors.ActiveCaption
+        Me.modelnumber1.ContextMenuStrip = Me.contextMenuStrip1
+        Me.modelnumber1.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.modelnumber1.Location = New System.Drawing.Point(151, 140)
+        Me.modelnumber1.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
+        Me.modelnumber1.Name = "modelnumber1"
+        Me.modelnumber1.Padding = New System.Windows.Forms.Padding(0, 2, 0, 0)
+        Me.modelnumber1.Size = New System.Drawing.Size(132, 35)
+        Me.modelnumber1.TabIndex = 24
+        '
+        'modelnumberHeader
+        '
+        Me.modelnumberHeader.ContextMenuStrip = Me.contextMenuStrip1
+        Me.modelnumberHeader.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.modelnumberHeader.Location = New System.Drawing.Point(151, 117)
+        Me.modelnumberHeader.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
+        Me.modelnumberHeader.Name = "modelnumberHeader"
+        Me.modelnumberHeader.Size = New System.Drawing.Size(93, 23)
+        Me.modelnumberHeader.TabIndex = 23
+        Me.modelnumberHeader.Text = "Model"
+        '
+        'status1
+        '
+        Me.status1.BackColor = System.Drawing.SystemColors.ActiveCaption
+        Me.status1.ContextMenuStrip = Me.contextMenuStrip1
+        Me.status1.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.status1.Location = New System.Drawing.Point(293, 198)
+        Me.status1.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
+        Me.status1.Name = "status1"
+        Me.status1.Padding = New System.Windows.Forms.Padding(0, 2, 0, 0)
+        Me.status1.Size = New System.Drawing.Size(137, 35)
+        Me.status1.TabIndex = 26
+        '
+        'statusHeader
+        '
+        Me.statusHeader.ContextMenuStrip = Me.contextMenuStrip1
+        Me.statusHeader.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.statusHeader.Location = New System.Drawing.Point(293, 175)
+        Me.statusHeader.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
+        Me.statusHeader.Name = "statusHeader"
+        Me.statusHeader.Size = New System.Drawing.Size(79, 23)
+        Me.statusHeader.TabIndex = 25
+        Me.statusHeader.Text = "Status"
+        ''equipmentlob1
+        '
+        Me.equipmentlob1.BackColor = System.Drawing.SystemColors.ActiveCaption
+        Me.equipmentlob1.ContextMenuStrip = Me.contextMenuStrip1
+        Me.equipmentlob1.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.equipmentlob1.Location = New System.Drawing.Point(16, 198)
+        Me.equipmentlob1.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
+        Me.equipmentlob1.Name = "equipmentlob1"
+        Me.equipmentlob1.Padding = New System.Windows.Forms.Padding(0, 2, 0, 0)
+        Me.equipmentlob1.Size = New System.Drawing.Size(120, 35)
+        Me.equipmentlob1.TabIndex = 28
+        '
+        'equipmentlobHeader
+        '
+        Me.equipmentlobHeader.ContextMenuStrip = Me.contextMenuStrip1
+        Me.equipmentlobHeader.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.equipmentlobHeader.Location = New System.Drawing.Point(13, 175)
+        Me.equipmentlobHeader.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
+        Me.equipmentlobHeader.Name = "equipmentlobHeader"
+        Me.equipmentlobHeader.Size = New System.Drawing.Size(123, 23)
+        Me.equipmentlobHeader.TabIndex = 27
+        Me.equipmentlobHeader.Text = "Equipment LOB"
+        '
+        'idnumber1
+        '
+        Me.idnumber1.BackColor = System.Drawing.SystemColors.ActiveCaption
+        Me.idnumber1.ContextMenuStrip = Me.contextMenuStrip1
+        Me.idnumber1.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.idnumber1.Location = New System.Drawing.Point(151, 261)
+        Me.idnumber1.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
+        Me.idnumber1.Name = "idnumber1"
+        Me.idnumber1.Padding = New System.Windows.Forms.Padding(0, 2, 0, 0)
+        Me.idnumber1.Size = New System.Drawing.Size(132, 35)
+        Me.idnumber1.TabIndex = 30
+        '
+        'idnumberHeader
+        '
+        Me.idnumberHeader.ContextMenuStrip = Me.contextMenuStrip1
+        Me.idnumberHeader.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.idnumberHeader.Location = New System.Drawing.Point(151, 238)
+        Me.idnumberHeader.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
+        Me.idnumberHeader.Name = "idnumberHeader"
+        Me.idnumberHeader.Size = New System.Drawing.Size(78, 23)
+        Me.idnumberHeader.TabIndex = 29
+        Me.idnumberHeader.Text = "ID Number"
+        '
+        'userlob1
+        '
+        Me.userlob1.BackColor = System.Drawing.SystemColors.ActiveCaption
+        Me.userlob1.ContextMenuStrip = Me.contextMenuStrip1
+        Me.userlob1.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.userlob1.Location = New System.Drawing.Point(17, 261)
+        Me.userlob1.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
+        Me.userlob1.Name = "userlob1"
+        Me.userlob1.Padding = New System.Windows.Forms.Padding(0, 2, 0, 0)
+        Me.userlob1.Size = New System.Drawing.Size(121, 35)
+        Me.userlob1.TabIndex = 32
+        '
+        'userlobHeader
+        '
+        Me.userlobHeader.ContextMenuStrip = Me.contextMenuStrip1
+        Me.userlobHeader.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.userlobHeader.Location = New System.Drawing.Point(17, 238)
+        Me.userlobHeader.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
+        Me.userlobHeader.Name = "userlobHeader"
+        Me.userlobHeader.Size = New System.Drawing.Size(119, 23)
+        Me.userlobHeader.TabIndex = 31
+        Me.userlobHeader.Text = "User LOB"
+        '
+        'dateallocated1
+        '
+        Me.dateallocated1.BackColor = System.Drawing.SystemColors.ActiveCaption
+        Me.dateallocated1.ContextMenuStrip = Me.contextMenuStrip1
+        Me.dateallocated1.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.dateallocated1.Location = New System.Drawing.Point(17, 325)
+        Me.dateallocated1.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
+        Me.dateallocated1.Name = "dateallocated1"
+        Me.dateallocated1.Padding = New System.Windows.Forms.Padding(0, 2, 0, 0)
+        Me.dateallocated1.Size = New System.Drawing.Size(121, 35)
+        Me.dateallocated1.TabIndex = 34
+        '
+        'dateallocatedHeader
+        '
+        Me.dateallocatedHeader.ContextMenuStrip = Me.contextMenuStrip1
+        Me.dateallocatedHeader.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.dateallocatedHeader.Location = New System.Drawing.Point(17, 302)
+        Me.dateallocatedHeader.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
+        Me.dateallocatedHeader.Name = "dateallocatedHeader"
+        Me.dateallocatedHeader.Size = New System.Drawing.Size(119, 23)
+        Me.dateallocatedHeader.TabIndex = 33
+        Me.dateallocatedHeader.Text = "Date Allocated"
+        '
+        'datereturned1
+        '
+        Me.datereturned1.BackColor = System.Drawing.SystemColors.ActiveCaption
+        Me.datereturned1.ContextMenuStrip = Me.contextMenuStrip1
+        Me.datereturned1.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.datereturned1.Location = New System.Drawing.Point(149, 325)
+        Me.datereturned1.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
+        Me.datereturned1.Name = "datereturned1"
+        Me.datereturned1.Padding = New System.Windows.Forms.Padding(0, 2, 0, 0)
+        Me.datereturned1.Size = New System.Drawing.Size(134, 35)
+        Me.datereturned1.TabIndex = 36
+        '
+        'datereturnedHeader
+        '
+        Me.datereturnedHeader.ContextMenuStrip = Me.contextMenuStrip1
+        Me.datereturnedHeader.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.datereturnedHeader.Location = New System.Drawing.Point(149, 302)
+        Me.datereturnedHeader.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
+        Me.datereturnedHeader.Name = "datereturnedHeader"
+        Me.datereturnedHeader.Size = New System.Drawing.Size(126, 23)
+        Me.datereturnedHeader.TabIndex = 35
+        Me.datereturnedHeader.Text = "Date Returned"
+        '
+        'comments1
+        '
+        Me.comments1.BackColor = System.Drawing.SystemColors.ActiveCaption
+        Me.comments1.ContextMenuStrip = Me.contextMenuStrip1
+        Me.comments1.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.comments1.Location = New System.Drawing.Point(293, 325)
+        Me.comments1.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
+        Me.comments1.Name = "comments1"
+        Me.comments1.Padding = New System.Windows.Forms.Padding(0, 2, 0, 0)
+        Me.comments1.Size = New System.Drawing.Size(276, 35)
+        Me.comments1.TabIndex = 38
+        '
+        'commentsHeader
+        '
+        Me.commentsHeader.ContextMenuStrip = Me.contextMenuStrip1
+        Me.commentsHeader.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.commentsHeader.Location = New System.Drawing.Point(293, 302)
+        Me.commentsHeader.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
+        Me.commentsHeader.Name = "commentsHeader"
+        Me.commentsHeader.Size = New System.Drawing.Size(126, 23)
+        Me.commentsHeader.TabIndex = 37
+        Me.commentsHeader.Text = "Comments"
+        '
+        'MainPage
+        '
+        Me.AutoScaleDimensions = New System.Drawing.SizeF(7.0!, 15.0!)
+        Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
+        Me.BackColor = System.Drawing.SystemColors.Control
+        Me.ClientSize = New System.Drawing.Size(1174, 621)
+        Me.ContextMenuStrip = Me.contextMenuStrip1
+        Me.Controls.Add(Me.comments1)
+        Me.Controls.Add(Me.commentsHeader)
+        Me.Controls.Add(Me.datereturned1)
+        Me.Controls.Add(Me.datereturnedHeader)
+        Me.Controls.Add(Me.dateallocated1)
+        Me.Controls.Add(Me.dateallocatedHeader)
+        Me.Controls.Add(Me.userlob1)
+        Me.Controls.Add(Me.userlobHeader)
+        Me.Controls.Add(Me.idnumber1)
+        Me.Controls.Add(Me.idnumberHeader)
+        Me.Controls.Add(Me.equipmentlob1)
+        Me.Controls.Add(Me.equipmentlobHeader)
+        Me.Controls.Add(Me.status1)
+        Me.Controls.Add(Me.statusHeader)
+        Me.Controls.Add(Me.hostname1)
+        Me.Controls.Add(Me.hostnameHeader)
+        Me.Controls.Add(Me.condition1)
+        Me.Controls.Add(Me.conditionHeader)
+        Me.Controls.Add(Me.updatepage)
+        Me.Controls.Add(Me.location1)
+        Me.Controls.Add(Me.userassigned1)
+        Me.Controls.Add(Me.serialnumber1)
+        Me.Controls.Add(Me.assettag1)
+        Me.Controls.Add(Me.po1)
+        Me.Controls.Add(Me.price1)
+        Me.Controls.Add(Me.brand1)
+        Me.Controls.Add(Me.locationHeader)
+        Me.Controls.Add(Me.userassignedHeader)
+        Me.Controls.Add(Me.serialnumberHeader)
+        Me.Controls.Add(Me.assettagHeader)
+        Me.Controls.Add(Me.poHeader)
+        Me.Controls.Add(Me.brandHeader)
+        Me.Controls.Add(Me.SearchButton)
+        Me.Controls.Add(Me.searchTagTextBox)
+        Me.Controls.Add(Me.priceHeader)
+        Me.Controls.Add(Me.modelnumberHeader)
+        Me.Controls.Add(Me.modelnumber1)
+        Me.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.Margin = New System.Windows.Forms.Padding(4, 3, 4, 3)
+        Me.Name = "MainPage"
+        Me.Padding = New System.Windows.Forms.Padding(0, 2, 0, 0)
+        Me.Text = "Equipment Tracker"
+        Me.contextMenuStrip1.ResumeLayout(False)
+        Me.ResumeLayout(False)
+        Me.PerformLayout()
+
+    End Sub
+
+    Friend WithEvents searchTagTextBox As TextBox
+    Friend WithEvents SearchButton As Button
+    Friend WithEvents priceHeader As Label
+    Friend WithEvents poHeader As Label
+    Friend WithEvents brandHeader As Label
+    Friend WithEvents assettagHeader As Label
+    Friend WithEvents serialnumberHeader As Label
+    Friend WithEvents userassignedHeader As Label
+    Friend WithEvents locationHeader As Label
+    Friend WithEvents price1 As Label
+    Friend WithEvents po1 As Label
+    Friend WithEvents brand1 As Label
+    Friend WithEvents assettag1 As Label
+    Friend WithEvents serialnumber1 As Label
+    Friend WithEvents userassigned1 As Label
+    Friend WithEvents location1 As Label
+    Friend WithEvents updatepage As Button
+    Friend WithEvents condition1 As Label
+    Friend WithEvents conditionHeader As Label
+    Friend WithEvents hostname1 As Label
+    Friend WithEvents hostnameHeader As Label
+    Friend WithEvents contextMenuStrip1 As ContextMenuStrip
+    Friend WithEvents copyToolStripMenuItem As ToolStripMenuItem
+    Friend WithEvents modelnumber1 As Label
+    Friend WithEvents modelnumberHeader As Label
+    Friend WithEvents status1 As Label
+    Friend WithEvents statusHeader As Label
+    Friend WithEvents equipmentlob1 As Label
+    Friend WithEvents equipmentlobHeader As Label
+    Friend WithEvents idnumber1 As Label
+    Friend WithEvents idnumberHeader As Label
+    Friend WithEvents userlob1 As Label
+    Friend WithEvents userlobHeader As Label
+    Friend WithEvents dateallocated1 As Label
+    Friend WithEvents dateallocatedHeader As Label
+    Friend WithEvents datereturned1 As Label
+    Friend WithEvents datereturnedHeader As Label
+    Friend WithEvents comments1 As Label
+    Friend WithEvents commentsHeader As Label
+End Class
+
+PageUpdate.vb
+Imports Google.Apis.Sheets.v4
+Imports Google.Apis.Sheets.v4.Data
+
+Public Class PageUpdate
+    Private service As SheetsService
+    Private searchTag As String
+    Private userLobValue As String
+    Private userAssignedValue As String
+    Private dateAllocatedValue As String
+    Private dateReturnedValue As String
+    Private conditionValue As String
+    Private commentsValue As String
+    Private Const SpreadsheetId As String = "1JOWFl9A1NovpzC-RH3TgqqJOlAV19U2dnq7WtQ9RXJ0"
+    Private progressForm As ProgressForm
+
+    ' Constructor with SheetsService and searchTag parameters
+    Public Sub New(service As SheetsService, searchTag As String, userLobValue As String, userAssignedValue As String, dateAllocatedValue As String, dateReturnedValue As String, conditionValue As String, commentsValue As String)
+        InitializeComponent()
+        Me.service = service
+        Me.searchTag = searchTag
+        Me.userLobValue = userLobValue
+        Me.userAssignedValue = userAssignedValue
+        Me.dateAllocatedValue = dateAllocatedValue
+        Me.dateReturnedValue = dateReturnedValue
+        Me.conditionValue = conditionValue
+        Me.commentsValue = commentsValue
+        InitializeForm()
+    End Sub
+
+    Private Sub InitializeForm()
+        ' Set the values of the labels in PageUpdate
+        userlobPrevious.Text = userLobValue
+        userassignedPrevious.Text = userAssignedValue
+        dateallocatedPrevious.Text = dateAllocatedValue
+        datereturnedPrevious.Text = dateReturnedValue
+        conditionPrevious.Text = conditionValue
+        commentsPrevious.Text = commentsValue
+    End Sub
+
+    Private Sub Updateuserassigned_Click(sender As Object, e As EventArgs) Handles updateuserassigned.Click
+        Dim newUserAssigned As String = textuserupdate.Text
+        Dim newLocation As String = textlocationupdate.Text
+        Dim newStatus As String = textstatusupdate.Text
+        Dim newCondition As String = textconditionupdate.Text
+        Dim newDateAllocated As String = textdateallocatedupdate.Text
+        Dim newComments As String = textcommentsupdate.Text
+        UpdateUserDataAsync(searchTag, newUserAssigned, newLocation, newStatus, newCondition, newDateAllocated, newComments)
+    End Sub
+
+
+
+    Private Async Sub UpdateUserDataAsync(tag As String, newUserAssigned As String, newLocation As String, newStatus As String, newCondition As String, newDateAllocated As String, newComments As String)
+        ' Initialize the progress form
+        If progressForm Is Nothing OrElse progressForm.IsDisposed Then
+            progressForm = New ProgressForm()
+        End If
+
+        progressForm.Show()
+        Application.DoEvents() ' Ensure the form is displayed immediately
+
+        Try
+            Dim sheetName As String = GetSheetNameFromTag(tag)
+            If String.IsNullOrEmpty(sheetName) Then Exit Sub
+
+            ' Fetch the entire range in one go
+            Dim range As String = $"{sheetName}!A2:Q"
+            Dim request As SpreadsheetsResource.ValuesResource.GetRequest = service.Spreadsheets.Values.Get(SpreadsheetId, range)
+            Dim response As ValueRange = Await request.ExecuteAsync()
+            Dim values As IList(Of IList(Of Object)) = response.Values
+
+            Dim rowIndexToUpdate As Integer = -1
+            If values IsNot Nothing AndAlso values.Count > 0 Then
+                For i As Integer = 0 To values.Count - 1
+                    Dim row As IList(Of Object) = values(i)
+                    If row.Count > 6 AndAlso row(6).ToString() = tag Then
+                        rowIndexToUpdate = i + 2 ' Adjusting for 1-based index
+                        Exit For
+                    End If
+                Next
+            End If
+
+            If rowIndexToUpdate < 0 Then
+                MessageBox.Show("Tag not found.")
+                Exit Sub
+            End If
+
+            ' Run UpdatePreviousUserDataAsync first and check for errors
+            Dim previousUserDataUpdateSuccessful As Boolean = Await UpdatePreviousUserDataAsync(sheetName, rowIndexToUpdate, tag)
+
+            ' If UpdatePreviousUserDataAsync encountered an error, stop execution
+            If Not previousUserDataUpdateSuccessful Then
+                MessageBox.Show("Failed to user details to previous records. The update was aborted. Pleaes add more columns in the database")
+                Return ' Exit the method if there was an error
+            End If
+
+            ' Prepare data for updating current user details
+            Dim updates As New List(Of ValueRange) From {
+            New ValueRange() With {.Range = $"{sheetName}!L{rowIndexToUpdate}", .Values = New List(Of IList(Of Object)) From {New List(Of Object)() From {newUserAssigned}}},
+            New ValueRange() With {.Range = $"{sheetName}!J{rowIndexToUpdate}", .Values = New List(Of IList(Of Object)) From {New List(Of Object)() From {newLocation}}},
+            New ValueRange() With {.Range = $"{sheetName}!I{rowIndexToUpdate}", .Values = New List(Of IList(Of Object)) From {New List(Of Object)() From {newStatus}}},
+            New ValueRange() With {.Range = $"{sheetName}!E{rowIndexToUpdate}", .Values = New List(Of IList(Of Object)) From {New List(Of Object)() From {newCondition}}},
+            New ValueRange() With {.Range = $"{sheetName}!O{rowIndexToUpdate}", .Values = New List(Of IList(Of Object)) From {New List(Of Object)() From {newDateAllocated}}},
+            New ValueRange() With {.Range = $"{sheetName}!Q{rowIndexToUpdate}", .Values = New List(Of IList(Of Object)) From {New List(Of Object)() From {newComments}}}
+        }
+
+            Dim batchUpdateRequest As New BatchUpdateValuesRequest() With {
+            .ValueInputOption = "RAW",
+            .Data = updates
+        }
+
+            Dim batchUpdate As SpreadsheetsResource.ValuesResource.BatchUpdateRequest = service.Spreadsheets.Values.BatchUpdate(batchUpdateRequest, SpreadsheetId)
+            Await batchUpdate.ExecuteAsync()
+
+            MessageBox.Show($"{tag} details have been updated.")
+        Catch ex As Exception
+            MessageBox.Show("An error occurred: " & ex.Message)
+        Finally
+            If progressForm IsNot Nothing AndAlso Not progressForm.IsDisposed Then
+                progressForm.Close()
+            End If
+        End Try
+
+
+    End Sub
+
+
+    Private Async Function UpdateSheetValuesAsync(batchUpdateRequest As BatchUpdateValuesRequest) As Task
+        Dim batchUpdate As SpreadsheetsResource.ValuesResource.BatchUpdateRequest = service.Spreadsheets.Values.BatchUpdate(batchUpdateRequest, SpreadsheetId)
+        Await batchUpdate.ExecuteAsync()
+    End Function
+
+    Private Async Function UpdatePreviousUserDataAsync(sheetName As String, rowIndex As Integer, tag As String) As Task(Of Boolean)
+        ' Initialize the progress form
+        If progressForm Is Nothing OrElse progressForm.IsDisposed Then
+            progressForm = New ProgressForm()
+        End If
+
+        progressForm.Show()
+        Application.DoEvents() ' Ensure the form is displayed immediately
+
+        Try
+            ' Define the starting column and number of columns to check
+            Dim startingColumn As String = "R" ' Starting column
+            Dim columnOffset As Integer = 6 ' Number of columns per set of previous user data
+
+            ' Prepare the values to be inserted
+            Dim previousUserValues As New List(Of Object) From {
+            userlobPrevious.Text,
+            userassignedPrevious.Text,
+            dateallocatedPrevious.Text,
+            datereturnedPrevious.Text,
+            conditionPrevious.Text,
+            commentsPrevious.Text
+        }
+
+            ' Convert starting column to its numeric index (A=1, B=2, ..., R=18)
+            Dim startingIndex As Integer = ColumnLetterToIndex(startingColumn)
+
+            ' Check columns from the starting column
+            For i As Integer = 0 To Integer.MaxValue ' Loop until we find available columns or reach the end
+                Dim currentColumnIndex As Integer = startingIndex + (i * columnOffset)
+                Dim columnRange As String = IndexToColumnLetter(currentColumnIndex) ' Convert index back to column letter
+
+                ' Check if the columns exceed the maximum valid column letter
+                If String.IsNullOrEmpty(columnRange) Then
+                    MessageBox.Show("No available columns found for previous user data.")
+                    Return False ' Return false to indicate failure
+                End If
+
+                ' Define the range for checking blank cells
+                Dim rangeToCheck As String = $"{sheetName}!{columnRange}{rowIndex}:{IndexToColumnLetter(currentColumnIndex + columnOffset - 1)}{rowIndex}"
+                Dim request As SpreadsheetsResource.ValuesResource.GetRequest = service.Spreadsheets.Values.Get(SpreadsheetId, rangeToCheck)
+                Dim response As ValueRange = Await request.ExecuteAsync()
+                Dim values As IList(Of IList(Of Object)) = response.Values
+
+                ' Check if all columns in the range are empty
+                Dim isEmpty As Boolean = True
+                If values IsNot Nothing AndAlso values.Count > 0 Then
+                    For Each value In values(0)
+                        If Not String.IsNullOrEmpty(value?.ToString()) Then
+                            isEmpty = False
+                            Exit For
+                        End If
+                    Next
+                End If
+
+                If isEmpty Then
+                    ' Update the blank cells with previous user data
+                    Dim previousUserUpdates As New List(Of ValueRange) From {
+                    New ValueRange() With {.Range = $"{sheetName}!{columnRange}{rowIndex}", .Values = New List(Of IList(Of Object)) From {New List(Of Object)() From {previousUserValues(0)}}},
+                    New ValueRange() With {.Range = $"{sheetName}!{IndexToColumnLetter(currentColumnIndex + 1)}{rowIndex}", .Values = New List(Of IList(Of Object)) From {New List(Of Object)() From {previousUserValues(1)}}},
+                    New ValueRange() With {.Range = $"{sheetName}!{IndexToColumnLetter(currentColumnIndex + 2)}{rowIndex}", .Values = New List(Of IList(Of Object)) From {New List(Of Object)() From {previousUserValues(2)}}},
+                    New ValueRange() With {.Range = $"{sheetName}!{IndexToColumnLetter(currentColumnIndex + 3)}{rowIndex}", .Values = New List(Of IList(Of Object)) From {New List(Of Object)() From {previousUserValues(3)}}},
+                    New ValueRange() With {.Range = $"{sheetName}!{IndexToColumnLetter(currentColumnIndex + 4)}{rowIndex}", .Values = New List(Of IList(Of Object)) From {New List(Of Object)() From {previousUserValues(4)}}},
+                    New ValueRange() With {.Range = $"{sheetName}!{IndexToColumnLetter(currentColumnIndex + 5)}{rowIndex}", .Values = New List(Of IList(Of Object)) From {New List(Of Object)() From {previousUserValues(5)}}}
+                }
+
+                    Dim batchUpdateRequest As New BatchUpdateValuesRequest() With {
+                    .ValueInputOption = "RAW",
+                    .Data = previousUserUpdates
+                }
+
+                    Dim batchUpdate As SpreadsheetsResource.ValuesResource.BatchUpdateRequest = service.Spreadsheets.Values.BatchUpdate(batchUpdateRequest, SpreadsheetId)
+                    Await batchUpdate.ExecuteAsync()
+
+                    Return True ' Return true to indicate success
+                End If
+            Next
+
+            MessageBox.Show("No available columns found for previous user data.")
+            Return False ' Return false to indicate failure
+        Catch ex As Exception
+            MessageBox.Show("An error occurred while updating previous user data: " & ex.Message)
+            Return False ' Return false to indicate failure
+        Finally
+            If progressForm IsNot Nothing AndAlso Not progressForm.IsDisposed Then
+                progressForm.Close()
+            End If
+        End Try
+    End Function
+
+
+
+    Private Function ColumnLetterToIndex(columnLetter As String) As Integer
+        Dim columnIndex As Integer = 0
+        Dim length As Integer = columnLetter.Length
+
+        For i As Integer = 0 To length - 1
+            columnIndex = (columnIndex * 26) + (Asc(columnLetter(i)) - Asc("A") + 1)
+        Next
+
+        Return columnIndex
+    End Function
+
+    Private Function IndexToColumnLetter(index As Integer) As String
+        Dim columnLetter As String = ""
+
+        While index > 0
+            Dim modValue As Integer = (index - 1) Mod 26
+            columnLetter = Chr(Asc("A") + modValue) & columnLetter
+            index = (index - modValue) \ 26
+        End While
+
+        Return columnLetter
+    End Function
+
+
+
+    Private Function GetSheetNameFromTag(tag As String) As String
+        If tag.StartsWith("MS-LTP") Then
+            Return "LAPTOP"
+        ElseIf tag.StartsWith("MS-MNTR") Then
+            Return "Monitor"
+        ElseIf tag.StartsWith("MS-SU") Then
+            Return "SystemUnit"
+        Else
+            MessageBox.Show("Invalid tag format.")
+            Return String.Empty
+        End If
+    End Function
+
+End Class
+
+PageUpdate.designer.vb
+Partial Class PageUpdate
+    Inherits System.Windows.Forms.Form
+
+    ' Required designer variable.
+    Private components As System.ComponentModel.IContainer
+
+    ' Form overrides dispose to clean up the component list.
+    <System.Diagnostics.DebuggerNonUserCode()>
+    Protected Overrides Sub Dispose(ByVal disposing As Boolean)
+        If disposing AndAlso (components IsNot Nothing) Then
+            components.Dispose()
+        End If
+        MyBase.Dispose(disposing)
+    End Sub
+
+    ' Note: The following procedure is required by the Windows Form Designer
+    ' It can be modified using the Windows Form Designer.
+    ' Do not modify it using the code editor.
+    <System.Diagnostics.DebuggerStepThrough()>
+    Private Sub InitializeComponent()
+        Me.updateuserassigned = New System.Windows.Forms.Button()
+        Me.textuserupdate = New System.Windows.Forms.TextBox()
+        Me.textlocationupdate = New System.Windows.Forms.TextBox()
+        Me.userassignedupdate = New System.Windows.Forms.Label()
+        Me.locationupdate = New System.Windows.Forms.Label()
+        Me.statusupdate = New System.Windows.Forms.Label()
+        Me.textstatusupdate = New System.Windows.Forms.TextBox()
+        Me.conditionupdate = New System.Windows.Forms.Label()
+        Me.textconditionupdate = New System.Windows.Forms.TextBox()
+        Me.dateallocatedupdate = New System.Windows.Forms.Label()
+        Me.textdateallocatedupdate = New System.Windows.Forms.TextBox()
+        Me.commentsupdate = New System.Windows.Forms.Label()
+        Me.textcommentsupdate = New System.Windows.Forms.TextBox()
+        Me.userlobPrevious = New System.Windows.Forms.Label()
+        Me.userassignedPrevious = New System.Windows.Forms.Label()
+        Me.dateallocatedPrevious = New System.Windows.Forms.Label()
+        Me.datereturnedPrevious = New System.Windows.Forms.Label()
+        Me.commentsPrevious = New System.Windows.Forms.Label()
+        Me.conditionPrevious = New System.Windows.Forms.Label()
+        Me.SuspendLayout()
+        '
+        'updateuserassigned
+        '
+        Me.updateuserassigned.Location = New System.Drawing.Point(100, 212)
+        Me.updateuserassigned.Name = "updateuserassigned"
+        Me.updateuserassigned.Size = New System.Drawing.Size(75, 23)
+        Me.updateuserassigned.TabIndex = 0
+        Me.updateuserassigned.Text = "Update"
+        Me.updateuserassigned.UseVisualStyleBackColor = True
+        '
+        'textuserupdate
+        '
+        Me.textuserupdate.Location = New System.Drawing.Point(107, 25)
+        Me.textuserupdate.Name = "textuserupdate"
+        Me.textuserupdate.Size = New System.Drawing.Size(100, 20)
+        Me.textuserupdate.TabIndex = 1
+        '
+        'textlocationupdate
+        '
+        Me.textlocationupdate.Location = New System.Drawing.Point(107, 50)
+        Me.textlocationupdate.Name = "textlocationupdate"
+        Me.textlocationupdate.Size = New System.Drawing.Size(100, 20)
+        Me.textlocationupdate.TabIndex = 2
+        '
+        'userassignedupdate
+        '
+        Me.userassignedupdate.AutoSize = True
+        Me.userassignedupdate.Location = New System.Drawing.Point(25, 28)
+        Me.userassignedupdate.Name = "userassignedupdate"
+        Me.userassignedupdate.Size = New System.Drawing.Size(75, 13)
+        Me.userassignedupdate.TabIndex = 3
+        Me.userassignedupdate.Text = "User Assigned"
+        '
+        'locationupdate
+        '
+        Me.locationupdate.AutoSize = True
+        Me.locationupdate.Location = New System.Drawing.Point(25, 53)
+        Me.locationupdate.Name = "locationupdate"
+        Me.locationupdate.Size = New System.Drawing.Size(48, 13)
+        Me.locationupdate.TabIndex = 4
+        Me.locationupdate.Text = "Location"
+        '
+        'statusupdate
+        '
+        Me.statusupdate.AutoSize = True
+        Me.statusupdate.Location = New System.Drawing.Point(25, 79)
+        Me.statusupdate.Name = "statusupdate"
+        Me.statusupdate.Size = New System.Drawing.Size(37, 13)
+        Me.statusupdate.TabIndex = 6
+        Me.statusupdate.Text = "Status"
+        '
+        'textstatusupdate
+        '
+        Me.textstatusupdate.Location = New System.Drawing.Point(107, 76)
+        Me.textstatusupdate.Name = "textstatusupdate"
+        Me.textstatusupdate.Size = New System.Drawing.Size(100, 20)
+        Me.textstatusupdate.TabIndex = 5
+        '
+        'conditionupdate
+        '
+        Me.conditionupdate.AutoSize = True
+        Me.conditionupdate.Location = New System.Drawing.Point(25, 105)
+        Me.conditionupdate.Name = "conditionupdate"
+        Me.conditionupdate.Size = New System.Drawing.Size(51, 13)
+        Me.conditionupdate.TabIndex = 8
+        Me.conditionupdate.Text = "Condition"
+        '
+        'textconditionupdate
+        '
+        Me.textconditionupdate.Location = New System.Drawing.Point(107, 102)
+        Me.textconditionupdate.Name = "textconditionupdate"
+        Me.textconditionupdate.Size = New System.Drawing.Size(100, 20)
+        Me.textconditionupdate.TabIndex = 7
+        '
+        'dateallocatedupdate
+        '
+        Me.dateallocatedupdate.AutoSize = True
+        Me.dateallocatedupdate.Location = New System.Drawing.Point(25, 131)
+        Me.dateallocatedupdate.Name = "dateallocatedupdate"
+        Me.dateallocatedupdate.Size = New System.Drawing.Size(77, 13)
+        Me.dateallocatedupdate.TabIndex = 10
+        Me.dateallocatedupdate.Text = "Date Allocated"
+        '
+        'textdateallocatedupdate
+        '
+        Me.textdateallocatedupdate.Location = New System.Drawing.Point(107, 128)
+        Me.textdateallocatedupdate.Name = "textdateallocatedupdate"
+        Me.textdateallocatedupdate.Size = New System.Drawing.Size(100, 20)
+        Me.textdateallocatedupdate.TabIndex = 9
+        '
+        'commentsupdate
+        '
+        Me.commentsupdate.AutoSize = True
+        Me.commentsupdate.Location = New System.Drawing.Point(25, 157)
+        Me.commentsupdate.Name = "commentsupdate"
+        Me.commentsupdate.Size = New System.Drawing.Size(56, 13)
+        Me.commentsupdate.TabIndex = 12
+        Me.commentsupdate.Text = "Comments"
+        '
+        'textcommentsupdate
+        '
+        Me.textcommentsupdate.Location = New System.Drawing.Point(107, 154)
+        Me.textcommentsupdate.Name = "textcommentsupdate"
+        Me.textcommentsupdate.Size = New System.Drawing.Size(100, 20)
+        Me.textcommentsupdate.TabIndex = 11
+        '
+        'userlobPrevious
+        '
+        Me.userlobPrevious.BackColor = System.Drawing.SystemColors.ActiveCaption
+        Me.userlobPrevious.Location = New System.Drawing.Point(335, 25)
+        Me.userlobPrevious.Name = "userlobPrevious"
+        Me.userlobPrevious.Size = New System.Drawing.Size(97, 16)
+        Me.userlobPrevious.TabIndex = 13
+        '
+        'userassignedPrevious
+        '
+        Me.userassignedPrevious.BackColor = System.Drawing.SystemColors.ActiveCaption
+        Me.userassignedPrevious.Location = New System.Drawing.Point(335, 55)
+        Me.userassignedPrevious.Name = "userassignedPrevious"
+        Me.userassignedPrevious.Size = New System.Drawing.Size(99, 16)
+        Me.userassignedPrevious.TabIndex = 14
+        '
+        'dateallocatedPrevious
+        '
+        Me.dateallocatedPrevious.BackColor = System.Drawing.SystemColors.ActiveCaption
+        Me.dateallocatedPrevious.Location = New System.Drawing.Point(335, 80)
+        Me.dateallocatedPrevious.Name = "dateallocatedPrevious"
+        Me.dateallocatedPrevious.Size = New System.Drawing.Size(99, 16)
+        Me.dateallocatedPrevious.TabIndex = 15
+        '
+        'datereturnedPrevious
+        '
+        Me.datereturnedPrevious.BackColor = System.Drawing.SystemColors.ActiveCaption
+        Me.datereturnedPrevious.Location = New System.Drawing.Point(335, 106)
+        Me.datereturnedPrevious.Name = "datereturnedPrevious"
+        Me.datereturnedPrevious.Size = New System.Drawing.Size(99, 16)
+        Me.datereturnedPrevious.TabIndex = 16
+        '
+        'commentsPrevious
+        '
+        Me.commentsPrevious.BackColor = System.Drawing.SystemColors.ActiveCaption
+        Me.commentsPrevious.Location = New System.Drawing.Point(335, 154)
+        Me.commentsPrevious.Name = "commentsPrevious"
+        Me.commentsPrevious.Size = New System.Drawing.Size(99, 16)
+        Me.commentsPrevious.TabIndex = 17
+        '
+        'conditionPrevious
+        '
+        Me.conditionPrevious.BackColor = System.Drawing.SystemColors.ActiveCaption
+        Me.conditionPrevious.Location = New System.Drawing.Point(335, 131)
+        Me.conditionPrevious.Name = "conditionPrevious"
+        Me.conditionPrevious.Size = New System.Drawing.Size(99, 16)
+        Me.conditionPrevious.TabIndex = 18
+        '
+        'PageUpdate
+        '
+        Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
+        Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
+        Me.ClientSize = New System.Drawing.Size(858, 330)
+        Me.Controls.Add(Me.conditionPrevious)
+        Me.Controls.Add(Me.commentsPrevious)
+        Me.Controls.Add(Me.datereturnedPrevious)
+        Me.Controls.Add(Me.dateallocatedPrevious)
+        Me.Controls.Add(Me.userassignedPrevious)
+        Me.Controls.Add(Me.userlobPrevious)
+        Me.Controls.Add(Me.commentsupdate)
+        Me.Controls.Add(Me.textcommentsupdate)
+        Me.Controls.Add(Me.dateallocatedupdate)
+        Me.Controls.Add(Me.textdateallocatedupdate)
+        Me.Controls.Add(Me.conditionupdate)
+        Me.Controls.Add(Me.textconditionupdate)
+        Me.Controls.Add(Me.statusupdate)
+        Me.Controls.Add(Me.textstatusupdate)
+        Me.Controls.Add(Me.locationupdate)
+        Me.Controls.Add(Me.userassignedupdate)
+        Me.Controls.Add(Me.textlocationupdate)
+        Me.Controls.Add(Me.textuserupdate)
+        Me.Controls.Add(Me.updateuserassigned)
+        Me.Name = "PageUpdate"
+        Me.Text = "Equipment Update"
+        Me.ResumeLayout(False)
+        Me.PerformLayout()
+
+    End Sub
+
+    Friend WithEvents updateuserassigned As Button
+    Friend WithEvents textuserupdate As TextBox
+    Friend WithEvents textlocationupdate As TextBox
+    Friend WithEvents userassignedupdate As Label
+    Friend WithEvents locationupdate As Label
+    Friend WithEvents statusupdate As Label
+    Friend WithEvents textstatusupdate As TextBox
+    Friend WithEvents conditionupdate As Label
+    Friend WithEvents textconditionupdate As TextBox
+    Friend WithEvents dateallocatedupdate As Label
+    Friend WithEvents textdateallocatedupdate As TextBox
+    Friend WithEvents commentsupdate As Label
+    Friend WithEvents textcommentsupdate As TextBox
+    Friend WithEvents userlob1 As Label
+    Friend WithEvents userassigned1 As Label
+    Friend WithEvents dateallocated1 As Label
+    Friend WithEvents datereturned1 As Label
+    Friend WithEvents condition1 As Label
+    Friend WithEvents comments1 As Label
+    Friend WithEvents userlobPrevious As Label
+    Friend WithEvents userassignedPrevious As Label
+    Friend WithEvents dateallocatedPrevious As Label
+    Friend WithEvents datereturnedPrevious As Label
+    Friend WithEvents commentsPrevious As Label
+    Friend WithEvents conditionPrevious As Label
+    Private WithEvents userassignedButton As Button
+End Class
+
+
+
